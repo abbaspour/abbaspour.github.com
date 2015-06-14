@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% if site.github.url %}
+    {% assign url_base = site.github.url %}
+  {% else %}
+    {% assign url_base = site.url %}
+  {% endif %}
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  {% include seo.html %}
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link type="text/plain" rel="author" href="{{ url_base }}/humans.txt" />
+  <link rel="shortcut icon" href="/favicon.ico?v={{ site.github.build_revision }}">
+  
+  <link href="{{ url_base }}/assets/css/style.css?v={{ site.github.build_revision }}" rel="stylesheet" media="screen">
+
+</head>
+<body class="{{ page.layout }} post{{ page.id | replace:"/","-" }}">
+
+<div class="container">
+
+  {% if page.layout == "default" %}
+  <div class="hero-unit">&nbsp;</div>
+  {% endif %}
+
+  {% include nav.html %}
+
+  <div class="content" id="content" role="main">

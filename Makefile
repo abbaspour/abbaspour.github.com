@@ -8,7 +8,7 @@ build:
 	bundle exec jekyll build
 
 run:
-	jekyll server -V --watch --baseurl ''
+	bundle exec jekyll serve -V --watch --baseurl '' -c _config.yml,_config_local.yml
 
 clean:
 	/bin/rm -rf _site/*
