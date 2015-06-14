@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /tag*
+Disallow: /tags*
+Allow: /
+Sitemap: http://www.fightcomplexity.com/sitemap.xml
