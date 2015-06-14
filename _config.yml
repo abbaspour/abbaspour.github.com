@@ -1,0 +1,90 @@
+#Jekyll config file
+
+name: Fight Complexity
+description: "Bring Simplicity to Software Development"
+author: Amin Abbaspour
+gravatar_id: d1fc362f95fd258ca52bb59ff2f03edc
+job_title: Software Engineer
+employer: Qantas
+url: "http://www.fightcomplexity.com"
+location:
+  city: Sydney
+  state: NSW
+  country: Australia
+#ga_username: 'UA-18088627-1'
+twitter:
+  username: "@aminize"
+  account_id: "53124671"
+google_plus_id: AminAbbaspour
+branch: master
+
+#files to exclude, array
+exclude:
+  - CONTRIBUTING.md
+  - README.md
+  - LICENSE
+  - readme.md
+  - bundle
+  - src
+  - CNAME
+  - Gemfile
+  - Gemfile.lock
+  - bower.json
+  - package.json
+  - script
+  - test
+  - less
+  - scss
+  - media
+  - feature-detects
+  - composer.json
+  - component.json
+  - grunt.js
+  - assets/vendor/bootstrap-sass/stylesheets
+  - assets/vendor/font-awesome/less
+  - assets/vendor/font-awesome/scss
+  - assets/vendor/font-awesome/src
+  - assets/vendor/modernizr/feature-detects
+  - assets/vendor/modernizr/media
+  - assets/vendor/modernizr/test
+  - assets/vendor/anchor-js/index.html
+  - ".bundle"
+  - vendor
+
+#number of items in RSS feed
+rss_limit: 10
+
+#permalink structure, see https://github.com/mojombo/jekyll/wiki/Permalinks
+permalink: /:year/:month/:day/:title/
+
+# Frontmatter defaults
+defaults:
+  -
+    scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+      comments: true
+
+#disqus widget
+disqus:
+  shortname: 'abbaspour'
+  count: 5
+  api_key: ""
+
+#build config
+highlighter: pygments
+markdown: kramdown
+timezone: Australia/Sydney
+encoding: UTF-8
+
+gems:
+  - jemoji
+  - jekyll-mentions
+  - jekyll-redirect-from
+  - jekyll-sitemap
+  - jekyll-feed
+
+sass:
+  style: :compressed
