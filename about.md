@@ -10,6 +10,14 @@ icons: true
 
 ![Amin Abbaspour](http://www.gravatar.com/avatar/{{ site.gravatar_id }}.png?size=250){: .alignright}
 
+Sometimes I feel like [Winston Smith](https://en.wikipedia.org/wiki/Winston_Smith) in the software world. Despite majority acceptance I find it hard to believe some of the well known software paradigms we use are of any help toward better software.
+
+Among other things software development and maintenance has turned unnecessarily complex. The only way to fight this complexity is to introduce simpler solutions. 
+
+What is best said by [Friedrich Nietzsche](https://en.wikipedia.org/?title=Friedrich_Nietzsche) "He who fights monsters should see to it that he himself does not become a monster." applies here. The way to fight complexity can easily turn into immature, underestimated, low quality software that ends up being more complex than the original one. The key is to have a right level of abstraction in our methodology, modeling and tools.
+
+I'm based in Sydney Australia working as a consultant at [Strut.ly](http://strut.ly/), currently with [Qantas Airlines](http://www.qantas.com). Before that as SSO systems specialist at [Telstra](https://www.telstra.com.au). 
+
 <!--
 Named one of the [top 25 most influential people in government and technology](http://fedscoop.com/top-federal-it-and-tech-folks-under-40/) and Fed 50's Disruptor of the Year, described by the US Chief Technology Officer as one of "the baddest of the badass innovators," and winner of the Open Source People's Choice Award, Ben Balter is the Government Evangelist at [GitHub](http://www.youtube.com/watch?v=l_T3XEgXl14) — the world's largest software development network — where he leads the efforts to encourage adoption of open source philosophies, making all levels of government better, one repository at a time.
 
