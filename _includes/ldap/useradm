@@ -1,0 +1,113 @@
+#!/bin/ksh
+
+## 
+# author: Amin Abbaspour
+# 
+
+INSTALL_DIR=/usr/local/openldap
+
+SLAP_CFG=$INSTALL_DIR/etc/openldap/slapd.conf
+PSWD_CFG=$INSTALL_DIR/etc/openldap/proxy/proxy.pwd
+
+CMD_SEARCH=$INSTALL_DIR/bin/ldapsearch
+
+opt_lst=0
+opt_lst_remote=0
+opt_ucn=''
+
+opt_search=1
+opt_modify=0
+
+opt_force=0
+
+verbose=0
+
+
+NO_WRAP="perl -p0e 's/\r?\n //g'"
+
+user_exists() {
+    FILTER="\"(&(objectClass=user)(cn=$1))\""
+    FIELDS=dn
+    SCRIPT="$FILTER $FIELDS 2>&1 | $NO_WRAP | awk '/^dn/{print \$2}'"
+    dn=`eval $REMOTE_SCMD $SCRIPT`
+    echo $dn
+    return
+}
+
+
+while getopts u:lLhv name
+do 
+    case $name in
+        u) opt_ucn=$OPTARG;;
+        l) opt_lst=1;;
+        L) opt_lst=1; opt_lst_remote=1;;
+        v) verbose=1; set -x;;
+        h|?|*) cat <<END >&2
+USAGE: useradm [-u userId] [-l] [-a|-d attribute] [-v value]
+            -u userId       # Account-01 userId, use to check if user exists
+            -l              # list local attributes of user (from Proxy) 
+            -L              # list remote attributes of user (from AD)
+            -v              # verbose mode
+            -h              # display usage help
+eg,
+     useradm -u d640492 -l        # list POSIX attributes of user d640492 (local proxy)
+     useradm -u d640492 -L        # list all attributes of user d640492 (remote Account-01)
+END
+            exit 1
+    esac
+done
+
+if [ "x$opt_ucn" = "x" ]; then
+    echo "useradm name is empty. Please provide a name with -u or -h for usage." >&2
+    exit 2
+fi
+
+
+SUFFIX=`grep ^suffix $SLAP_CFG | fgrep -i "ou=people" | awk '{print $2}'`
+
+ADMN_DN=`awk '/^rootdn/{print $2}' $SLAP_CFG`
+ADMN_PW=`awk -F= '/^ROOT_PWD/{print $2}' $PSWD_CFG`
+URI="ldaps://localhost:636/"
+SCMD="$CMD_SEARCH 2>/dev/null -LLL -Z -b $SUFFIX -H $URI -D$ADMN_DN -w $ADMN_PW"
+
+URI=`grep ^uri $SLAP_CFG | uniq | head -1 | awk '{print $2}'`
+REMOTE_USR=`grep binddn= $SLAP_CFG | grep -v ^# | uniq | head  -1 | cut -d= -f2-`
+REMOTE_PWD=`grep credentials= $SLAP_CFG | grep -v ^# | uniq | head  -1 | cut -d= -f2-`
+REMOTE_SCMD="$CMD_SEARCH 2>/dev/null -LLL -b $SUFFIX -H $URI -D$REMOTE_USR -w $REMOTE_PWD"
+
+if [ $opt_search != 0 ]; then
+    CMD="$CMD_SEARCH 2>/dev/null -LLL -Z -b $SUFFIX"
+else
+    CMD=$CMD_MODIFY
+fi
+
+
+CMD="$CMD -D$ADMN_DN"
+VCMD="$CMD -w ******"
+CMD="$CMD -w $ADMN_PW"
+
+if [ $verbose != 0 ]; then 
+    echo "-------------------------"
+    echo "Admin DN  : $ADMN_DN"
+    echo "Admin Pass: ********" # $ADMN_PW
+    echo "Suffix    : $SUFFIX"
+    echo "-------------------------"
+fi
+
+echo "UserID: $opt_ucn"
+usr_dn=$(user_exists $opt_ucn)
+
+if [ "x$usr_dn" = "x" ]; then
+    echo "no such user: $opt_ucn" >&2
+    exit 5
+fi
+
+if [ $opt_lst = 1 ]; then
+    echo "mode: list"
+    if [ $opt_lst_remote = 1 ]; then 
+        if [ $verbose != 0 ]; then echo "$VCMD cn=$opt_ucn | $NO_WRAP"; fi
+        eval "$REMOTE_SCMD cn=$opt_ucn | $NO_WRAP"
+    else 
+        eval "$SCMD cn=$opt_ucn | $NO_WRAP"
+    fi
+fi

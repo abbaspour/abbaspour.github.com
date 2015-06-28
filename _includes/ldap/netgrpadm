@@ -1,0 +1,254 @@
+#!/bin/ksh
+
+## 
+# list/add/remove   netgroup
+# add/remove users to netgroup
+#
+# author: Amin Abbaspour
+#
+
+INSTALL_DIR=/usr/local/openldap
+
+SLAP_CFG=$INSTALL_DIR/etc/openldap/slapd.conf
+PSWD_CFG=$INSTALL_DIR/etc/openldap/proxy/proxy.pwd
+
+CMD_SEARCH=$INSTALL_DIR/bin/ldapsearch
+CMD_MODIFY=$INSTALL_DIR/bin/ldapmodify
+
+opt_gcn=0
+
+opt_grp_lst=0
+opt_grp_crt=""
+opt_grp_rmv=0
+
+opt_usr_lst=0
+opt_usr_del=0
+opt_usr_add=0
+
+opt_search=0
+opt_modify=0
+
+verbose=0
+
+NO_WRAP="perl -p0e 's/\r?\n //g'"
+
+user_exists() {
+    FILTER="\"(&(objectClass=user)(cn=$1))\""
+    FIELDS=dn
+    SCRIPT="$FILTER $FIELDS 2>&1 | $NO_WRAP | awk '/^dn/{print \$2}'"
+    dn=`eval $SCMD -b $SUFFIX $SCRIPT`
+    echo $dn
+    return
+}
+
+netgroup_exists() {
+    FILTER="\"(&(objectClass=nisNetgroup)(cn=$1))\""
+    FIELDS=dn
+    SCRIPT="$FILTER $FIELDS 2>&1 | $NO_WRAP | awk '/^dn/{print \$2}'"
+    dn=`eval $SCMD -b $SUFFIX $SCRIPT`
+    echo $dn
+    return
+}
+
+is_slave() {
+    echo `grep -c -e "^syncrepl" $SLAP_CFG`
+}
+
+while getopts vhlg:d:a:c:r name
+do
+    case $name in
+        g)  opt_gcn=$OPTARG;;
+        l)  
+            if [ $opt_gcn != 0 ]; then
+                opt_usr_lst=1; opt_grp_lst=0; opt_search=1;
+            else
+                opt_usr_lst=0; opt_grp_lst=1; opt_gcn=1; opt_search=1;
+            fi;;
+        c) opt_grp_crt=$OPTARG; opt_modify=1;;
+        r) opt_grp_rmv=1; opt_modify=1;;
+        d) opt_usr_del=$OPTARG; opt_modify=1;;
+        a) opt_usr_add=$OPTARG; opt_modify=1;;
+        v) verbose=1; set -x;;
+        h|?|*) cat <<END >&2
+USAGE: netgrpadm [-l] [-g name] [-d|-a userId] [-c description] [-r]
+             -l          # list available netgroups users of a group (if specified with -g)
+             -g name     # name of the netgroup to operate 
+             -d userId   # delete user from netgroup
+             -a userId   # add user to netgroup
+             -c desc     # create a new netgroup with given description
+             -r          # remote a netgroup
+             -v          # verbose mode
+eg,
+     netgrpadm -l                         # list all netgroups
+     netgrpadm -g oes_usrs -l             # list all users in oes_usrs netgroup
+
+     netgrpadm -g oes_usrs -a d640492     # add user d640492 to oes_usrs netgroup
+     netgrpadm -g oes_usrs -d d640492     # delete user d640492 from oes_usrs netgroup
+
+     netgrpadm -g oim_usrs -c "OIM L4"    # create oim_usrs netgroup with description
+     netgrpadm -g oim_usrs -r             # remove oim_usrs netgroup 
+END
+            exit 1
+    esac
+done
+
+if [ $opt_gcn = 0 ]; then
+    echo "netgroup name is empty. Please provide a name with -g or -h for usage." >&2
+    exit 2
+fi
+
+if [ ! -r $PSWD_CFG ]; then
+    echo "$SLAP_CFG is not readable" >&2
+    exit 3
+fi
+
+if [ ! -r $PSWD_CFG ]; then
+    echo "$PSWD_CFG is not readable" >&2
+    exit 4
+fi
+
+slave=$(is_slave)
+
+if [ $slave -eq 1 ]; then
+    echo "ERROR: run netgrpadm in master node"
+    exit 5
+fi
+
+ADMN_DN=`awk '/^rootdn/{print $2}' $SLAP_CFG`
+ADMN_PW=`awk -F= '/^ROOT_PWD/{print $2}' $PSWD_CFG`
+
+SUFFIX=`grep ^suffix $SLAP_CFG |fgrep -iv ou=people |fgrep -iv ou=groups |awk '{print $2}'`
+
+SCMD="$CMD_SEARCH -Z -b $SUFFIX -H ldaps://localhost -D$ADMN_DN -w $ADMN_PW"
+
+if [ $opt_search != 0 ]; then
+    CMD="$CMD_SEARCH -Z -b $SUFFIX"
+else
+    CMD=$CMD_MODIFY
+fi
+
+CMD="$CMD -H ldaps://localhost:636/ -D$ADMN_DN"
+VCMD="$CMD -w ******"
+CMD="$CMD -w $ADMN_PW"
+
+if [ $verbose != 0 ]; then 
+    echo "-------------------------"
+    echo "Admin DN  : $ADMN_DN"
+    echo "Admin Pass: ********" # $ADMN_PW
+    echo "Suffix    : $SUFFIX"
+    echo "-------------------------"
+fi
+    
+if [ $opt_usr_lst != 0 ]; then
+    FILTER="\"(&(objectClass=nisNetgroup)(cn=$opt_gcn))\""
+    FIELDS=nisNetgroupTriple
+    SCRIPT="$FILTER $FIELDS 2>&1 | $NO_WRAP | awk '/^$FIELDS/{print \$2}'"
+    if [ $verbose != 0 ]; then echo "$VCMD $SCRIPT"; fi
+    eval "$CMD $SCRIPT"
+    exit 0
+fi
+
+if [ $opt_grp_lst != 0 ]; then
+    FILTER="objectClass=nisNetgroup"
+    FIELDS=cn
+    SCRIPT="$FILTER $FIELDS 2>&1 | $NO_WRAP | awk '/^$FIELDS/{print \$2}'"
+    if [ $verbose != 0 ]; then echo "$VCMD $SCRIPT"; fi
+    eval "$CMD $SCRIPT"
+    exit 0
+fi
+
+if [ $opt_usr_add != 0 ]; then
+    usr_dn=$(user_exists $opt_usr_add)
+    if [ "x$usr_dn" = "x" ]; then
+        echo "no such user: $opt_usr_add" >&2
+        exit 5
+    fi
+
+    grp_dn=$(netgroup_exists $opt_gcn)
+    if [ "x$grp_dn" = "x" ]; then
+        echo "no such netgroup: $opt_gcn" >&2
+        exit 5
+    fi
+
+    cat >/tmp/group-modify-$$.ldif <<END
+dn: $grp_dn
+changetype: modify
+add: nisNetgroupTriple
+nisNetgroupTriple: (,$opt_usr_add,)
+
+END
+   
+    if [ $verbose != 0 ]; then echo "$CMD -vvv -d 1 -f /tmp/group-modify-$$.ldif"; fi
+    eval $CMD -vvv -f /tmp/group-modify-$$.ldif
+
+    if [ $verbose = 0 ]; then rm -f /tmp/group-modify-$$.ldif; fi
+fi
+
+
+if [ $opt_usr_del != 0 ]; then
+    grp_dn=$(netgroup_exists $opt_gcn)
+    if [ "x$grp_dn" = "x" ]; then
+        echo "no such netgroup: $opt_gcn" >&2
+        exit 5
+    fi
+
+    cat >/tmp/group-modify-$$.ldif <<END
+dn: $grp_dn
+changetype: modify
+delete: nisNetgroupTriple
+nisNetgroupTriple: (,$opt_usr_del,)
+
+END
+   
+    if [ $verbose != 0 ]; then echo "$SCMD -vvv -d 1 -f /tmp/group-modify-$$.ldif"; fi
+    eval $CMD -vvv -f /tmp/group-modify-$$.ldif
+
+    if [ $verbose = 0 ]; then rm -f /tmp/group-modify-$$.ldif; fi
+fi
+
+if [ "x$opt_grp_crt" != "x" ]; then
+    grp_dn=$(netgroup_exists $opt_gcn)
+    if [ "x$grp_dn" != "x" ]; then
+        echo "netgroup exists: $grp_dn" >&2
+        exit 5
+    fi
+
+    PSUFFIX=`echo $SUFFIX | tr -d \"`
+    cat >/tmp/group-modify-$$.ldif <<END
+dn: cn=$opt_gcn,ou=Netgroup,$PSUFFIX
+changetype: add
+objectClass: top
+objectClass: nisNetgroup
+description: $opt_grp_crt
+cn: $opt_gcn
+
+END
+   
+    if [ $verbose != 0 ]; then echo "$SCMD -f /tmp/group-modify-$$.ldif"; fi
+    eval $CMD -f /tmp/group-modify-$$.ldif
+
+    if [ $verbose = 0 ]; then rm -f /tmp/group-modify-$$.ldif; fi
+fi
+
+if [ $opt_grp_rmv != 0 ]; then
+    grp_dn=$(netgroup_exists $opt_gcn)
+    if [ "x$grp_dn" = "x" ]; then
+        echo "netgroup does not exist: $opt_gcn" >&2
+        exit 5
+    fi
+
+    PSUFFIX=`echo $SUFFIX | tr -d \"`
+    cat >/tmp/group-modify-$$.ldif <<END
+dn: $grp_dn
+changetype: delete
+
+END
+   
+    if [ $verbose != 0 ]; then echo "$SCMD -f /tmp/group-modify-$$.ldif"; fi
+    eval $CMD -f /tmp/group-modify-$$.ldif
+
+    if [ $verbose = 0 ]; then rm -f /tmp/group-modify-$$.ldif; fi
+fi
+
+
+

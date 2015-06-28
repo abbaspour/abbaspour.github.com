@@ -1,0 +1,45 @@
+<?xml version='1.0'?>
+<!DOCTYPE service_bundle SYSTEM '/usr/share/lib/xml/dtd/service_bundle.dtd.1'>
+<service_bundle type='manifest' name='export'>
+  <service name='network/ldap/nslcd' type='service' version='0'>
+    <create_default_instance enabled='true'/>
+    <single_instance/>
+    
+    <dependency name='usr' grouping='require_all' restart_on='none' type='service'>
+        <service_fmri value='svc:/system/filesystem/minimal'/>
+    </dependency>
+    
+    <dependency name='net' grouping='require_all' restart_on='none' type='service'>
+        <service_fmri value='svc:/network/initial'/>
+    </dependency>
+    
+    <exec_method name='start' type='method' exec='/lib/svc/method/nslcd-method %m' 
+                 timeout_seconds='120'>
+        <method_context>
+            <method_credential user='nslcd' group='nslcd' privileges='basic'/>
+        </method_context>
+    </exec_method>
+    
+    <exec_method name='stop' type='method' exec='/lib/svc/method/nslcd-method %m' 
+                 timeout_seconds='60'>
+        <method_context>
+            <method_credential user='nslcd' group='nslcd' privileges='basic'/>
+        </method_context>
+    </exec_method>
+    
+    <stability value='Unstable'/>
+    
+    <template>
+        <common_name>
+            <loctext xml:lang='C'>LDAP connection daemon</loctext>
+        </common_name>
+        <description>
+            <loctext xml:lang='C'>nslcd is a LDAP connection daemon that is used to 
+            do LDAP queries for the NSS and PAM modules.</loctext>
+        </description>
+        <documentation>
+            <manpage title='ldap_cachemgr' section='1M' manpath='/usr/share/man'/>
+        </documentation>
+    </template>
+  </service>
+</service_bundle>

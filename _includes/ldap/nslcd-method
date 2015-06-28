@@ -1,0 +1,59 @@
+#!/bin/sh
+
+# /lib/svc/method/nslcd-method script for starting and stopping nslcd
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+NSLCD_BIN=/usr/sbin/nslcd
+NSLCD_DESC="LDAP connection daemon"
+NSLCD_CFG=/etc/nslcd.conf
+NSLCD_STATEDIR=/var/run/nslcd
+NSLCD_PIDFILE=$NSLCD_STATEDIR/nslcd.pid
+
+if [ ! -x "$NSLCD_BIN" ]; then echo "$NSLCD_BIN missing."; exit 0; fi
+if [ ! -f "$NSLCD_CFG" ]; then echo "$NSLCD_CFG missing."; exit 0; fi
+
+NSLCD_UID=`awk '$1 ~ /^uid/{print $2}' $NSLCD_CFG`
+NSLCD_GID=`awk '$1 ~ /^gid/{print $2}' $NSLCD_CFG`
+
+case "$1" in
+start)
+  # set up state directory
+  [ -d "$NSLCD_STATEDIR" ] || ( mkdir -m 755 "$NSLCD_STATEDIR" ; 
+                                chown $NSLCD_UID:$NSLCD_GID "$NSLCD_STATEDIR" )
+  $NSLCD_BIN &
+  echo $! > $NSLCD_PIDFILE
+  ;;
+stop)
+  # stop nslcd
+  if [ -f "$NSLCD_PIDFILE" ]
+  then
+      kill -KILL `cat $NSLCD_PIDFILE`
+      [ -n "$NSLCD_PIDFILE" ] && rm -f $NSLCD_PIDFILE
+  else
+      echo "no pid file: $NSLCD_PIDFILE" 
+  fi
+  ;;
+status)
+  if [ -f "$NSLCD_PIDFILE" ]
+  then
+    if $NSLCD_BIN --check
+    then
+      echo "nslcd running (pid `cat $NSLCD_PIDFILE`)"
+      exit 0
+    else
+      echo "nslcd stopped"
+      exit 1
+    fi
+  else
+    echo "nslcd stopped"
+    exit 3
+  fi
+  ;;
+*)
+  echo "Usage: $0 {start|stop|status}"
+  exit 1
+  ;;
+esac
+
+exit 0
+

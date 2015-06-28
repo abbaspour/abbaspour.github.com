@@ -1,0 +1,12 @@
+$ /usr/sbin/ldapclient -v manual \
+-a credentialLevel=proxy \
+-a authenticationMethod=simple \
+-a proxyDN="uid=user,OU=eProfile,DC=core,DC=dir,DC=company,DC=com" \
+-a proxyPassword=***** \
+-a defaultSearchBase=OU=eProfile,DC=core,DC=dir,DC=company,DC=com \
+-a defaultServerList="openldap1.internal openldap2.internal"  \
+-a objectClassMap=passwd:posixAccount=user \
+-a objectclassMap=shadow:shadowAccount=user \
+-a objectclassMap=group:posixGroup=group \
+-a serviceSearchDescriptor="passwd:ou=People,OU=eProfile,DC=core,DC=dir,DC=company,DC=com"\
+-a serviceSearchDescriptor="group:ou=Groups,OU=eProfile,DC=core,DC=dir,DC=company,DC=com"
