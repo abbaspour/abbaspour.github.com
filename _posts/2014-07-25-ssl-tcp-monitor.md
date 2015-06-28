@@ -61,5 +61,5 @@ echo "127.0.0.1 www.twitter.com" >> /etc/hosts
 echo "127.0.0.1 www.google.com.au" >> /etc/hosts
 {% endhighlight %} 
 
-PS. similar work done [here in ruby](https://www.fishnetsecurity.com/6labs/blog/ssl-relay-proxy-creative-solution-complex-issue) 
-and [here in python](https://github.com/iSECPartners/tcpprox).
+PS. similar work done in [ruby](https://www.fishnetsecurity.com/6labs/blog/ssl-relay-proxy-creative-solution-complex-issue) 
+and [python](https://github.com/iSECPartners/tcpprox).
