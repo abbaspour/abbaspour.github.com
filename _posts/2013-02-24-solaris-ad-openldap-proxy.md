@@ -20,7 +20,7 @@ I tested couple of other approaches but finally stayed with OpenLDAP [slapo-rwm]
 
 ## Deployment Model
 
-   <img src="{{ site.url }}/assets/img/ldap/central-auth-logical-diagram.png" alt="central auth logical diagram" class="postimg"/>
+![AD Proxy Diagram](/assets/img/ldap/central-auth-logical-diagram.png){: .aligncenter}
 
 ## Tree Structure
 {% highlight text %}

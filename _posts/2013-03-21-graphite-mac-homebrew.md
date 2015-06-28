@@ -266,8 +266,8 @@ Render by accessing simple and elegent graphite REST API:
 http://127.0.0.1:8000/render/?&from=-1h&target=*.local.load_avg.*&width=500&height=300
 {% endhighlight %}
 
-Results in:
+Results:
 
-   <img src="{{ site.url }}/assets/img/graphite/graphite-localhost-la.png" alt="load-avg-last-hour" class="postimg"/>
+![Graphite Load Average](/assets/img/graphite/graphite-localhost-la.png){: .aligncenter}
 
 

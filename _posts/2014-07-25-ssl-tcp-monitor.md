@@ -6,7 +6,7 @@ tags: [tcpmon, stunnel, socat, ssl, https, tunnel]
 So this is the setup. We want to know what's an application that only accepts secure connection doing:
 
 
-<img src="{{ site.url }}/assets/img/stunnel/stunnel.png" alt="Tunnel Setup" class="postimg"/>
+![Stunnel Diagram](/assets/img/stunnel/stunnel.png){: .aligncenter}
 
 So first create a fake certificate and install in into the system:
 
