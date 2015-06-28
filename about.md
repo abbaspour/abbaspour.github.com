@@ -19,7 +19,7 @@ What is best said by [Friedrich Nietzsche](https://en.wikipedia.org/?title=Fried
 
 Today's software runs on ultra advanced hardware. A capacity rarely fully utilized. Software is being developed on top of layers of older software because we're afraid to change it ultimately because we find it too complex to understand and build software. 
 
-I'm based in Sydney Australia working as a consultant at [Strut.ly](http://strut.ly/), currently with [Qantas Airlines](http://www.qantas.com). Before that as SSO systems specialist at [Telstra](https://www.telstra.com.au). 
+I'm based in Sydney Australia working as a consultant at [Qantas Airlines](http://www.qantas.com). Before that as SSO systems specialist at [Telstra](https://www.telstra.com.au). 
 
 <!--
 Named one of the [top 25 most influential people in government and technology](http://fedscoop.com/top-federal-it-and-tech-folks-under-40/) and Fed 50's Disruptor of the Year, described by the US Chief Technology Officer as one of "the baddest of the badass innovators," and winner of the Open Source People's Choice Award, Ben Balter is the Government Evangelist at [GitHub](http://www.youtube.com/watch?v=l_T3XEgXl14) — the world's largest software development network — where he leads the efforts to encourage adoption of open source philosophies, making all levels of government better, one repository at a time.
