@@ -77,7 +77,7 @@ disqus:
   api_key: ""
 
 #build config
-highlighter: pygments
+highlighter: rouge
 markdown: kramdown
 timezone: Australia/Sydney
 encoding: UTF-8
