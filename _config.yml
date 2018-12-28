@@ -1,11 +1,12 @@
 #Jekyll config file
 
 name: Auth0 Life
+title: Auth0 Life
 description: "Blog on Identity and Auth0"
 author: Amin Abbaspour
 gravatar_id: d1fc362f95fd258ca52bb59ff2f03edc
 job_title: Software Engineer
-employer: Qantas
+employer: Auth0
 url: "http://www.auth0.life"
 location:
   city: Sydney
@@ -51,6 +52,8 @@ exclude:
   - ".bundle"
   - vendor
 
+include: ['_pages']
+
 #number of items in RSS feed
 rss_limit: 10
 
@@ -79,7 +82,7 @@ markdown: kramdown
 timezone: Australia/Sydney
 encoding: UTF-8
 
-gems:
+plugins:
   - jemoji
   - jekyll-mentions
   - jekyll-redirect-from
@@ -88,3 +91,5 @@ gems:
 
 sass:
   style: :compressed
+
+github: [metadata]
